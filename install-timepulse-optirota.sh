@@ -379,7 +379,7 @@ echo -e "${GREEN}Arquivo .env do OptiRota criado!${NC}"
 # ==========================================================================
 print_step 7 $TOTAL_STEPS "Criando arquivos Docker..."
 
-# --- Dockerfile TimePulse AI (FIX: npm install) ---
+# --- Dockerfile TimePulse AI (FIX: canvas dependencies) ---
 cat << 'DOCKERFILE' > $TIMEPULSE_DIR/Dockerfile
 # =================================================
 # TimePulse AI - Dockerfile de Producao
@@ -388,8 +388,18 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Instalar dependencias de compilacao
-RUN apk add --no-cache python3 make g++
+# Instalar dependencias de compilacao para canvas e outros pacotes nativos
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    pkgconfig \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev \
+    librsvg-dev \
+    pixman-dev
 
 # Copiar package files
 COPY package*.json ./
@@ -435,7 +445,7 @@ services:
         max-file: "3"
 COMPOSE
 
-# --- Dockerfile OptiRota (FIX: npm install + build) ---
+# --- Dockerfile OptiRota (FIX: canvas dependencies + build) ---
 cat << 'DOCKERFILE' > $OPTIROTA_DIR/Dockerfile
 # =================================================
 # OptiRota - Dockerfile de Producao
@@ -445,8 +455,18 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Instalar dependencias de compilacao
-RUN apk add --no-cache python3 make g++
+# Instalar dependencias de compilacao para canvas e outros pacotes nativos
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    pkgconfig \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev \
+    librsvg-dev \
+    pixman-dev
 
 # Copiar package files
 COPY package*.json ./
@@ -466,6 +486,19 @@ RUN npm run build
 FROM node:20-alpine
 
 WORKDIR /app
+
+# Instalar dependencias de runtime para canvas e outros pacotes nativos
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    pkgconfig \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev \
+    librsvg-dev \
+    pixman-dev
 
 # Copiar package files
 COPY package*.json ./
